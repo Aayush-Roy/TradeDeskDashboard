@@ -1,8 +1,23 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
-import { positions } from "../data/data";
+// import { positions } from "../data/data";
 
 const Positions = () => {
+  const[positions,setPositions]=useState([]);
+  const getPositions = async()=>{
+    try{
+      const data = await axios.get("http://localhost:8000/api/positions")
+      console.log(data);
+      setPositions(data.data);
+    }catch(err){
+      console.log(err);
+    }
+  }
+  useEffect(()=>{
+    getPositions();
+    
+  },[])
   return (
     <>
       <h3 className="title">Positions ({positions.length})</h3>
