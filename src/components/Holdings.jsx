@@ -10,14 +10,14 @@ const Holdings = () => {
   // setAllHoldings(holdings);
   useEffect(() => {
     axios.get("http://localhost:8000/api/holdings").then((res) => {
-      console.log(res);
-      setAllHoldings(res.data);
+      console.log(res.data);
+      setAllHoldings(res.data.data);
       
     });
   }, []);
 
   // const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-  const labels = allHoldings?.map((subArray) => subArray["name"]);
+  const labels = allHoldings && allHoldings?.map((subArray) => subArray["name"]);
 
   const data = {
     labels,

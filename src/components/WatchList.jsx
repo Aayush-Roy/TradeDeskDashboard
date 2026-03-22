@@ -1,11 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import axios from "axios";
 
 import GeneralContext from "./GeneralContext";
 
 import { Tooltip, Grow } from "@mui/material";
-
+import { buyStock, sellStock } from "../api/trade.js";
 import {
   BarChartOutlined,
   KeyboardArrowDown,
@@ -13,14 +13,32 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 
-import { watchlist } from "../data/data";
+// import { watchlist } from "../data/data";
 import { DoughnutChart } from "./DoughnutChart";
 // import {DoughnutChart} from "."
 
-const labels = watchlist.map((subArray) => subArray["name"]);
+
+
+
 
 
 const WatchList = () => {
+  const [watchlist,setWatchList]=useState([]);
+  const labels = watchlist?.map((subArray) => subArray["name"]);
+  const fetchWatchList = async()=>{
+    try{
+      const data = await axios.get("http://localhost:8000/api/watchlist");
+      console.log(data);
+      setWatchList(data.data);
+    }catch(err){
+      console.log("Something went wrong!",err)
+    }
+  }
+
+  useEffect(()=>{
+    fetchWatchList();
+  },[])
+
   const data = {
     labels,
     datasets: [
@@ -48,32 +66,6 @@ const WatchList = () => {
     ],
   };
 
-  // export const data = {
-  //   labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-  // datasets: [
-  //   {
-  //     label: "# of Votes",
-  //     data: [12, 19, 3, 5, 2, 3],
-  //     backgroundColor: [
-  //       "rgba(255, 99, 132, 0.2)",
-  //       "rgba(54, 162, 235, 0.2)",
-  //       "rgba(255, 206, 86, 0.2)",
-  //       "rgba(75, 192, 192, 0.2)",
-  //       "rgba(153, 102, 255, 0.2)",
-  //       "rgba(255, 159, 64, 0.2)",
-  //     ],
-  //     borderColor: [
-  //       "rgba(255, 99, 132, 1)",
-  //       "rgba(54, 162, 235, 1)",
-  //       "rgba(255, 206, 86, 1)",
-  //       "rgba(75, 192, 192, 1)",
-  //       "rgba(153, 102, 255, 1)",
-  //       "rgba(255, 159, 64, 1)",
-  //     ],
-  //     borderWidth: 1,
-  //   },
-  // ],
-  // };
 
   return (
     <div className="watchlist-container">
@@ -131,49 +123,149 @@ const WatchListItem = ({ stock }) => {
   );
 };
 
-const WatchListActions = ({ uid }) => {
-  const generalContext = useContext(GeneralContext);
+// const WatchListActions = ({ uid }) => {
 
-  const handleBuyClick = () => {
-    generalContext.openBuyWindow(uid);
+//   const generalContext = useContext(GeneralContext);
+
+//   const handleBuyClick = () => {
+//     generalContext.openBuyWindow(uid);
+//   };
+
+//   return (
+//     <span className="actions">
+//       <span>
+//         <Tooltip
+//           title="Buy (B)"
+//           placement="top"
+//           arrow
+//           TransitionComponent={Grow}
+//           onClick={handleBuyClick}
+//         >
+//           <button className="buy">Buy</button>
+//         </Tooltip>
+//         <Tooltip
+//           title="Sell (S)"
+//           placement="top"
+//           arrow
+//           TransitionComponent={Grow}
+//         >
+//           <button className="sell">Sell</button>
+//         </Tooltip>
+//         <Tooltip
+//           title="Analytics (A)"
+//           placement="top"
+//           arrow
+//           TransitionComponent={Grow}
+//         >
+//           <button className="action">
+//             <BarChartOutlined className="icon" />
+//           </button>
+//         </Tooltip>
+//         <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
+//           <button className="action">
+//             <MoreHoriz className="icon" />
+//           </button>
+//         </Tooltip>
+//       </span>
+//     </span>
+//   );
+// };
+
+const WatchListActions = ({ uid }) => {
+
+  const [loading,setLoading]=useState(false);
+
+  const handleBuyClick = async () => {
+
+    try{
+
+      setLoading(true);
+
+      await buyStock({
+        name: uid,
+        price: 100   // temporary fallback
+      });
+
+      alert("Stock bought 🚀");
+
+    }catch(err){
+
+      console.log(err);
+
+    }finally{
+
+      setLoading(false);
+
+    }
+
   };
 
+
+
+  const handleSellClick = async () => {
+
+    try{
+
+      setLoading(true);
+
+      await sellStock({
+        name: uid,
+        price: 100
+      });
+
+      alert("Stock sold 📉");
+
+    }catch(err){
+
+      console.log(err);
+
+    }finally{
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+
   return (
+
     <span className="actions">
+
       <span>
-        <Tooltip
-          title="Buy (B)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-          onClick={handleBuyClick}
-        >
-          <button className="buy">Buy</button>
-        </Tooltip>
-        <Tooltip
-          title="Sell (S)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="sell">Sell</button>
-        </Tooltip>
-        <Tooltip
-          title="Analytics (A)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="action">
-            <BarChartOutlined className="icon" />
+
+        <Tooltip title="Buy">
+
+          <button
+            className="buy"
+            onClick={handleBuyClick}
+            disabled={loading}
+          >
+            Buy
           </button>
+
         </Tooltip>
-        <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
-          <button className="action">
-            <MoreHoriz className="icon" />
+
+
+
+        <Tooltip title="Sell">
+
+          <button
+            className="sell"
+            onClick={handleSellClick}
+            disabled={loading}
+          >
+            Sell
           </button>
+
         </Tooltip>
+
+
+
       </span>
+
     </span>
+
   );
 };
